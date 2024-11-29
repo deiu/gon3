@@ -404,9 +404,15 @@ func (p *Parser) parseCollection() (*BlankNode, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// TODO: use consts
+	rdfFirst := newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>")
+	rdfRest := newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>")
+	rdfNil := newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#nil>")
+
 	bNode := p.blankNode("")
 	p.curSubject = bNode
-	p.curPredicate = newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>") // TODO: make this a const or something
+	p.curPredicate = rdfFirst
 	next := p.peek()
 	for next.Typ != tokenEndCollection {
 		err := p.parseObject()
@@ -414,15 +420,17 @@ func (p *Parser) parseCollection() (*BlankNode, error) {
 			return nil, err
 		}
 		next = p.peek()
+		if next.Typ != tokenEndCollection {
+			nextBNode := p.blankNode("")
+			p.emitTriple(p.curSubject, rdfRest, nextBNode)
+			p.curSubject = nextBNode
+		}
 	}
 
 	_, err = p.expect(tokenEndCollection)
 	if err != nil {
 		return nil, err
 	}
-	// TODO: use consts
-	rdfRest := newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>")
-	rdfNil := newIRIFromString("<http://www.w3.org/1999/02/22-rdf-syntax-ns#nil>")
 	p.emitTriple(p.curSubject, rdfRest, rdfNil)
 	p.curSubject = savedSubject
 	p.curPredicate = savedPredicate
