@@ -1,8 +1,9 @@
 package gon3
 
 import (
-	"github.com/rychipman/easylex"
 	"strings"
+
+	"github.com/rychipman/easylex"
 )
 
 const (
@@ -47,13 +48,13 @@ func lexDocument(l *easylex.Lexer) easylex.StateFn {
 		return lexPunctuation
 	case 't', 'f', 'a', 'b', 'B', 'p', 'P':
 		if matchTrue.MatchOne(l) {
-			if isWhitespace(l.Peek()) {
+			if isWhitespaceOrPunctuation(l.Peek()) {
 				l.Emit(tokenTrue)
 				return lexDocument
 			}
 		}
 		if matchFalse.MatchOne(l) {
-			if isWhitespace(l.Peek()) {
+			if isWhitespaceOrPunctuation(l.Peek()) {
 				l.Emit(tokenFalse)
 				return lexDocument
 			}
@@ -85,6 +86,13 @@ func lexDocument(l *easylex.Lexer) easylex.StateFn {
 
 func isWhitespace(r rune) bool {
 	if strings.IndexRune("\n\r\t\v\f ", r) >= 0 {
+		return true
+	}
+	return false
+}
+
+func isWhitespaceOrPunctuation(r rune) bool {
+	if strings.IndexRune("\n\r\t\v\f.;, ", r) >= 0 {
 		return true
 	}
 	return false
