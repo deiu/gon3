@@ -179,29 +179,34 @@ func unescapeEChar(s string) string {
 }
 
 func getIndexOfEscape(s string, substr string) int {
-	idx := strings.Index(s, substr)
-	if idx < 0 {
-		return idx
-	}
-
-	// search through runes backward from the index to ensure the escape isn't escaped
-	var size int
-	count := 1
-	escapeRune := []rune(substr)[0]
-	var r rune
-	for i := idx; i > 0; i -= size {
-		r, size = utf8.DecodeLastRuneInString(s[:idx])
-		if r != escapeRune {
-			break
+	for {
+		idx := strings.Index(s, substr)
+		if idx < 0 {
+			return idx
 		}
-		count++
-	}
 
-	// an even number of escape characters indicates it's escaped
-	if count%2 == 0 {
-		return -1
+		// search through runes backward from the index to ensure the escape isn't escaped
+		var size int
+		count := 1
+		escapeRune := []rune(substr)[0]
+		var r rune
+		for i := idx; i > 0; i -= size {
+			r, size = utf8.DecodeLastRuneInString(s[:i])
+			if r != escapeRune {
+				break
+			}
+			count++
+		}
+
+		// an odd number of escape characters indicates it's not escaped
+		if count%2 == 1 {
+			return idx
+		}
+
+		// skip that false match and check the rest of the string
+		idx += len(substr)
+		s = s[idx:]
 	}
-	return idx
 }
 
 func unescapeUChar(s string) string {

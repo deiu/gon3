@@ -60,6 +60,16 @@ func Test_unescapeUChar(t *testing.T) {
 			s:    `a \\\\user`,
 			want: `a \\\\user`,
 		},
+		{
+			name: "multiple short escapes",
+			s:    `an \u0061b\u0063 \\user`,
+			want: `an abc \\user`,
+		},
+		{
+			name: "ending with escaped escape",
+			s:    `end\\u`,
+			want: `end\\u`,
+		},
 	}
 
 	for _, tt := range tests {
