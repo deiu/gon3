@@ -5,6 +5,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type Term interface {
@@ -177,11 +178,43 @@ func unescapeEChar(s string) string {
 	return s
 }
 
+func getIndexOfEscape(s string, substr string) int {
+	for {
+		idx := strings.Index(s, substr)
+		if idx < 0 {
+			return idx
+		}
+
+		// search through runes backward from the index to ensure the escape isn't escaped
+		var size int
+		count := 1
+		escapeRune := []rune(substr)[0]
+		var r rune
+		for i := idx; i > 0; i -= size {
+			r, size = utf8.DecodeLastRuneInString(s[:i])
+			if r != escapeRune {
+				break
+			}
+			count++
+		}
+
+		// an odd number of escape characters indicates it's not escaped
+		if count%2 == 1 {
+			return idx
+		}
+
+		// skip that false match and check the rest of the string
+		idx += len(substr)
+		s = s[idx:]
+	}
+}
+
 func unescapeUChar(s string) string {
 	for {
 		var start, hex, end string
-		uIdx := strings.Index(s, `\u`)
-		UIdx := strings.Index(s, `\U`)
+		uIdx := getIndexOfEscape(s, `\u`)
+		UIdx := getIndexOfEscape(s, `\U`)
+
 		if uIdx >= 0 {
 			start = s[:uIdx]
 			if uIdx+6 > len(s) {
