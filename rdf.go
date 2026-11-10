@@ -323,7 +323,6 @@ func (g *Graph) NodesSorted() []Term {
 	}
 	termsSlice := TermSlice(terms)
 	sort.Sort(termsSlice)
-	fmt.Printf("nodes before sort: %+v\nafter:             %+v\n", terms, termsSlice)
 	return termsSlice
 }
 
