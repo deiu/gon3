@@ -82,7 +82,6 @@ func (b *BlankNode) Equals(other Term) bool {
 	default:
 		return false
 	}
-	panic("unreachable")
 }
 
 func (b *BlankNode) RawValue() string {

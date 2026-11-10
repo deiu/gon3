@@ -81,7 +81,6 @@ func lexDocument(l *easylex.Lexer) easylex.StateFn {
 	default:
 		return lexPName
 	}
-	panic("unreachable")
 }
 
 func isWhitespace(r rune) bool {
