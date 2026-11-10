@@ -82,7 +82,6 @@ func (b *BlankNode) Equals(other Term) bool {
 	default:
 		return false
 	}
-	panic("unreachable")
 }
 
 func (b *BlankNode) RawValue() string {
@@ -323,7 +322,6 @@ func (g *Graph) NodesSorted() []Term {
 	}
 	termsSlice := TermSlice(terms)
 	sort.Sort(termsSlice)
-	fmt.Printf("nodes before sort: %+v\nafter:             %+v\n", terms, termsSlice)
 	return termsSlice
 }
 

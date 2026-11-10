@@ -42,7 +42,7 @@ func (m *typeMockLexer) NextToken() easylex.Token {
 	typ := m.types[m.pos]
 	m.pos += 1
 	return easylex.Token{
-		typ,
-		"n/a",
+		Typ: typ,
+		Val: "n/a",
 	}
 }

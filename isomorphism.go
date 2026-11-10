@@ -35,14 +35,11 @@ func (g *Graph) Canonicalize() *CanonicalGraph {
 func (cg1 *CanonicalGraph) IsomorphicTo(cg2 *CanonicalGraph) bool {
 	// both graphs need same number of nodes
 	if len(cg1.nodes) != len(cg2.nodes) {
-		fmt.Println("Graphs not same size")
 		return false
 	}
 	// make sure non-blank nodes match
 	for i, n1 := range cg1.nodes {
 		if !n1.Equals(cg2.nodes[i]) {
-			fmt.Println("Graphs' non-blank nodes don't match")
-			fmt.Printf("first: %+v\nsecond: %+v\n", cg1.nodes, cg2.nodes)
 			return false
 		}
 	}
@@ -56,7 +53,6 @@ func (cg1 *CanonicalGraph) BijectTo(cg2 *CanonicalGraph) bool {
 	cg2.groundNodes()
 	// ensure grounded nodes built at same rate
 	if !cg1.verifyGrounded(cg2) {
-		fmt.Println("verifyGrounded failed")
 		return false
 	}
 	// map bnodes in cg1 to bnodes in cg2
@@ -82,23 +78,19 @@ func (cg1 *CanonicalGraph) BijectTo(cg2 *CanonicalGraph) bool {
 	// mark two ungrounded nodes with matching sigs as grounded and recurse
 	for _, bn1 := range cg1.bNodes {
 		if _, has := cg1.grounded[bn1]; has {
-			fmt.Println("A")
 			continue
 		}
 		for _, bn2 := range cg2.bNodes {
 			if _, has := cg2.grounded[bn2]; has {
-				fmt.Println("B")
 				continue
 			}
 			if cg1.ungrounded[bn1] != cg2.ungrounded[bn2] {
-				fmt.Println("C")
 				continue
 			}
 			// try setting this pair as grounded
 			hash := sha1.Sum([]byte(bn1.String()))
 			cg1.grounded[bn1] = string(hash[:])
 			cg2.grounded[bn2] = string(hash[:])
-			fmt.Println("recursing")
 			if cg1.BijectTo(cg2) {
 				return true
 			}
@@ -108,7 +100,6 @@ func (cg1 *CanonicalGraph) BijectTo(cg2 *CanonicalGraph) bool {
 		}
 	}
 	// if we have exhausted all signature matches, fail
-	fmt.Println("signature matches exhausted")
 	return false
 }
 
@@ -137,17 +128,14 @@ func (cg1 *CanonicalGraph) validBijectionTo(bij map[*BlankNode]*BlankNode, cg2 *
 	sort.Sort(cNodes1)
 	sort.Sort(cNodes2)
 	if len(nodes1) != len(cNodes1) || len(nodes2) != len(cNodes2) {
-		fmt.Println("invalid bijection: lengths don't match")
 		//fmt.Printf("%s\n%s\n%s\n%s\n", nodes1, cNodes1, nodes2, cNodes2)
 		return false
 	}
 	for i := 0; i < len(nodes1); i++ {
 		if nodes1[i] != cNodes1[i] {
-			fmt.Println("invalid bijection: mismatched node")
 			return false
 		}
 		if nodes2[i] != cNodes2[i] {
-			fmt.Println("invalid bijection: mismatched node")
 			return false
 		}
 	}
@@ -190,7 +178,6 @@ func (cg *CanonicalGraph) groundNodes() {
 		// mark nodes as grounded by their membership in triples
 		for _, n := range cg.bNodes {
 			if _, has := cg.grounded[n]; !has {
-				fmt.Println("hashing a node")
 				cg.hashNode(n)
 			}
 		}

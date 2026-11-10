@@ -60,13 +60,17 @@ func lexDocument(l *easylex.Lexer) easylex.StateFn {
 			}
 		}
 		if matchA.MatchOne(l) {
-			if isWhitespace(l.Peek()) {
+			// Turtle allows the object to follow 'a' without whitespace,
+			// e.g. `a<http://ex/C>` or `a[ ... ]`.
+			if isAKeywordTerminator(l) {
 				l.Emit(tokenA)
 				return lexDocument
 			}
 		}
 		if matchSPARQLBase.MatchOne(l) {
-			if isWhitespace(l.Peek()) {
+			next := l.Peek()
+			// e.g. `BASE<http://ex/>`
+			if isWhitespace(next) || next == '<' {
 				l.Emit(tokenSPARQLBase)
 				return lexDocument
 			}
@@ -81,7 +85,6 @@ func lexDocument(l *easylex.Lexer) easylex.StateFn {
 	default:
 		return lexPName
 	}
-	panic("unreachable")
 }
 
 func isWhitespace(r rune) bool {
@@ -96,6 +99,21 @@ func isWhitespaceOrPunctuation(r rune) bool {
 		return true
 	}
 	return false
+}
+
+// isAKeywordTerminator reports whether the 'a' just matched is the rdf:type
+// keyword rather than the start of a prefixed name such as `adms:status` or
+// `a:concept`. It is the keyword unless the next character is ':' or
+// continues a PN_PREFIX.
+func isAKeywordTerminator(l *easylex.Lexer) bool {
+	next := l.Peek()
+	if isWhitespace(next) {
+		return true
+	}
+	if next == ':' || matchPNChars.Peek(l) {
+		return false
+	}
+	return true
 }
 
 func lexComment(l *easylex.Lexer) easylex.StateFn {
@@ -384,9 +402,10 @@ func lexPName(l *easylex.Lexer) easylex.StateFn {
 	}
 
 	easylex.NewMatcher().AcceptRunes(":").AssertOne(l, "Expected ':' while lexing pname")
-	// TODO: get exhaustive list of "end" chars
-	// TODO: factor this out into a matcher
-	if easylex.NewMatcher().AcceptRunes("\n\r\t\v\f ;,.#").Peek(l) {
+	// A PNAME_NS (`ex:`) ends where the next character cannot start a
+	// PN_LOCAL: whitespace, punctuation, a comment, an IRIREF, a collection
+	// or blank node delimiter, a string, or end of input.
+	if l.Peek() == easylex.EOF || easylex.NewMatcher().AcceptRunes("\n\r\t\v\f ;,.#<()[]\"'").Peek(l) {
 		l.Emit(tokenPNameNS)
 		return lexDocument
 	}
