@@ -522,7 +522,6 @@ func (p *Parser) parseLiteral() (*Literal, error) {
 	default:
 		return nil, fmt.Errorf("Expected a literal token, got %v", tok)
 	}
-	panic("unreachable")
 }
 
 func (p *Parser) parseNumericLiteral() (*Literal, error) {
