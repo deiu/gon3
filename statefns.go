@@ -422,21 +422,27 @@ func lexPName(l *easylex.Lexer) easylex.StateFn {
 	}
 	for {
 		m := easylex.NewMatcher().Union(matchPNChars).AcceptRunes(".:").MatchLookAheadRun(l, easylex.NewMatcher().Union(matchPNChars).AcceptRunes(`.:\%`))
+		escaped := false
 		for {
 			switch l.Peek() {
 			case '\\':
 				l.Next()
 				matchEscapable.AssertOne(l, "Expected escapable while lexing pname")
+				escaped = true
 				continue
 			case '%':
 				l.Next()
 				matchHex.AssertOne(l, "Expected hex digit while lexing pname")
 				matchHex.AssertOne(l, "Expected hex digit while lexing pname")
+				escaped = true
 				continue
 			}
 			break
 		}
-		if !m {
+		// An escape can be followed directly by another escape after more
+		// name characters (`a\/b\/c`), so keep going while either made
+		// progress.
+		if !m && !escaped {
 			break
 		}
 	}
