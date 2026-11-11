@@ -119,9 +119,9 @@ func (p *Parser) newBlankNode() *BlankNode {
 	return b
 }
 
-// resolvePName returns the IRI of a prefixed name. Turtle 1.1 section 6.3
-// defines it as the namespace IRI followed by the local name, so the local
-// name is appended rather than resolved as a relative reference. The local
+// resolvePName returns the IRI of a prefixed name. RDF 1.1 Turtle section 2.4
+// defines it as the namespace IRI concatenated with the local name, so the
+// local name is appended rather than resolved as a relative reference. The local
 // name can itself contain ':', so only the first one separates the prefix.
 // The result goes through joinURL like an IRIREF does, so that both forms of
 // the same IRI are encoded alike.

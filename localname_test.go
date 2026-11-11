@@ -17,8 +17,9 @@ func TestLocalNameConsecutiveEscapes(t *testing.T) {
 }
 
 // TestLocalNameEscapes checks that a prefixed name's IRI is the namespace IRI
-// followed by the local name with each PN_LOCAL_ESC backslash removed, as
-// Turtle 1.1 section 6.3 requires, and that %-escapes are kept as written.
+// followed by the local name with each PN_LOCAL_ESC replaced by the character
+// after its backslash (RDF 1.1 Turtle sections 2.4 and 6.4), and that
+// %-escapes are kept as written.
 func TestLocalNameEscapes(t *testing.T) {
 	tests := []struct {
 		name, local, want string
