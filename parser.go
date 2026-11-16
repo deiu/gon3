@@ -119,17 +119,36 @@ func (p *Parser) newBlankNode() *BlankNode {
 	return b
 }
 
+// resolvePName returns the IRI of a prefixed name. RDF 1.1 Turtle section 2.4
+// defines it as the namespace IRI concatenated with the local name, so the
+// local name is appended rather than resolved as a relative reference. The local
+// name can itself contain ':', so only the first one separates the prefix.
+// The result goes through joinURL like an IRIREF does, so that both forms of
+// the same IRI are encoded alike.
 func (p *Parser) resolvePName(pname string) (*IRI, error) {
-	strs := strings.Split(pname, ":")
-	prefix := strs[0]
-	name := strs[1]
+	prefix, local, _ := strings.Cut(pname, ":")
 	if iri, present := p.namespaces[prefix]; present {
-		rel := iriRefToURL(name)
-		merged, err := joinURL(iri.url, rel)
-		// resolved := iri.url.ResolveReference(rel) // @@TODO: make sure this properly resolves weird things
+		merged, err := joinURL(iri.url+unescapeLocalName(local), "")
 		return &IRI{url: merged}, err
 	}
 	return nil, fmt.Errorf("Prefix %q not found in declared namespaces", prefix)
+}
+
+// unescapeLocalName removes the backslash from each PN_LOCAL_ESC in a local
+// name. Percent escapes are left as written, because Turtle keeps them in the
+// IRI.
+func unescapeLocalName(s string) string {
+	if !strings.Contains(s, `\`) {
+		return s
+	}
+	var b strings.Builder
+	for i := 0; i < len(s); i++ {
+		if s[i] == '\\' && i+1 < len(s) {
+			i++
+		}
+		b.WriteByte(s[i])
+	}
+	return b.String()
 }
 
 func (p *Parser) resolveIRI(iri string) (*IRI, error) {

@@ -253,13 +253,13 @@ var positiveParserTests []string = []string{
 	// TODO: automatic base of doc name
 	//"turtle-subm-01",
 	"turtle-eval-struct-01",
+	"localname_with_COLON",
+	"number_sign_following_localName",
+	"number_sign_following_PNAME_NS",
+	"reserved_escaped_localName",
 	// TODO: something wrong with IRI resolution
 	//"langtagged_LONG_with_subtag",
 	//"LITERAL_LONG2_with_REVERSE_SOLIDUS",
-	//"localname_with_COLON",
-	//"number_sign_following_localName",
-	//"number_sign_following_PNAME_NS",
-	//"reserved_escaped_localName",
 	//"turtle-subm-02",
 	//"turtle-subm-03",
 	//"turtle-subm-04",
